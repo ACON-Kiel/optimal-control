@@ -4,8 +4,9 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
 import matplotlib.patches as patches
-from matplotlib import animation
+from matplotlib.animation import FuncAnimation
 import argparse
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Cart-Pole Collocation')
@@ -30,24 +31,6 @@ def plot_cart_pole_graphs(t, x, u):
     ax4 = plt.subplot(gs[2, :])
     plt.plot(t, u)
     plt.show()
-
-
-class MyFuncAnimation(animation.FuncAnimation):
-    """
-    Unfortunately, it seems that the _blit_clear method of the Animation
-    class contains an error in several matplotlib verions
-    That's why, I fork it here and insert the latest git version of
-    the function.
-    """
-
-    def _blit_clear(self, artists, bg_cache):
-        # Get a list of the axes that need clearing from the artists that
-        # have been drawn. Grab the appropriate saved background from the
-        # cache and restore.
-        axes = set(a.axes for a in artists)
-        for a in axes:
-            if a in bg_cache:  # this is the previously missing line
-                a.figure.canvas.restore_region(bg_cache[a])
 
 
 def animate_cart_pole(t, x):
@@ -77,9 +60,9 @@ def animate_cart_pole(t, x):
         time_text.set_text('')
         rect.set_xy((0.0, 0.0))
         line.set_data([], [])
-        return time_text, rect, line
+        return time_text, rect, line,
 
-    def animate(i):
+    def update(i):
         x_car = cp[i]
         y_car = 0
 
@@ -89,9 +72,12 @@ def animate_cart_pole(t, x):
         time_text.set_text('time = {:2.2f}'.format(t[i]))
         rect.set_xy((x_car - 0.5 * cart_width, y_car - cart_height))
         line.set_data([x_car, x_pendulum], [y_car, y_pendulum])
-        return time_text, rect, line
 
-    anim = MyFuncAnimation(fig, animate, frames=len(t), init_func=init,
-                           interval=t[-1] / len(t) * 1000, blit=True, repeat=False)
+        return time_text, rect, line,
 
-    fig.show()
+    ani = FuncAnimation(fig, update, frames=len(t), init_func=init,
+                        blit=True, interval=10)
+
+    plt.show()
+
+    return ani
