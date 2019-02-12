@@ -66,4 +66,4 @@ if __name__ == '__main__':
     if options.graph:
         plot_cart_pole_graphs(t, y, u)
     if options.animate:
-        animate_cart_pole(t, y)
+        animation = animate_cart_pole(t, y)
